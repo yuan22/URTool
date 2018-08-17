@@ -1,7 +1,7 @@
 @shift /0
 @echo OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
-SET APP_NAME=UR-Tool Prime v1.3 beta
+SET APP_NAME=UR-Tool Prime v1.4 beta
 SET AUTHORS=[by JamFlux]
 SET APP_DESCRIPTION=Extract and Repack system formats on android 5-8.1
 set CYGWIN=nodosfilewarning
@@ -417,7 +417,7 @@ if exist 01-Project\1-Sources\system.img bins\ImgExtractor 01-Project\1-Sources\
 call :Detect_vendor_size
 echo %SIZE%>>01-Project\1-Sources\sys_size.txt
 echo.
-echo %VSIZE%>>01-Project\1-Sources\vend_size.txt
+if exist 01-Project\vendor echo %VSIZE%>>01-Project\1-Sources\vend_size.txt
 if exist 01-Project\1-Sources\vendor.img del 01-Project\1-Sources\vendor.img >nul
 if exist 01-Project\1-Sources\vendor.transfer.list del 01-Project\1-Sources\vendor.transfer.list >nul
 echo.
