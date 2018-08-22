@@ -486,9 +486,12 @@ if exist 01-Project\1-Sources\system.img del 01-Project\1-Sources\system.img >nu
 if exist 01-Project\1-Sources\system.transfer.list del 01-Project\1-Sources\system.transfer.list >nul 2>nul
 if not exist 01-Project\1-Sources\file_contexts call :File_Context_converter >nul 2>nul
 TIMEOUT /T 3 /nobreak > NUL
-cd 01-Project/1-Sources > nul
-del original_symlinks > nul
-move /y symlinks original_symlinks > nul
+cd 01-Project/1-Sources
+if exist original_symlinks del /q original_symlinks
+cd ..\..
+%busybox% sort -u < 01-Project/1-Sources/symlinks >> 01-Project/1-Sources/original_symlinks
+cd 01-Project/1-Sources
+del /q symlinks
 cd ..\..
 goto work_place
 
@@ -591,8 +594,8 @@ echo.
 %cecho% *          Repacking to: {0a}!format!{#} format...
 echo.
 if not exist 01-Project\2-New_system mkdir 01-Project\2-New_system >nul
-if exist 01-Project\vendor bins\new_cyg\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
-bins\new_cyg\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
+if exist 01-Project\vendor bins\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
+bins\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
 if "!format!"=="payload.bin" (goto Repack_IMG) else goto next_1.1
 :next_1.1
 cls
@@ -640,8 +643,8 @@ echo.
 %cecho% *          Repacking to: {0a}system.img{#} format...
 echo.
 if not exist 01-Project\2-New_system mkdir 01-Project\2-New_system >nul
-if exist 01-Project\vendor bins\new_cyg\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
-bins\new_cyg\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
+if exist 01-Project\vendor bins\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
+bins\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
 cls
 echo.
 echo.
@@ -696,9 +699,9 @@ echo.
 echo.
 %cecho% *          Compressing to: {0a}!format!{#} format...
 echo.
-bins\new_cyg\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
+bins\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
 TIMEOUT /T 3 /nobreak >nul
-if exist 01-Project\2-New_system\vendor_ext4.img bins\new_cyg\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
+if exist 01-Project\2-New_system\vendor_ext4.img bins\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
 TIMEOUT /T 3 /nobreak >nul
 bins\simg2sdat 01-Project\2-New_system\system.img 01-Project\2-New_system >nul
 TIMEOUT /T 3 /nobreak >nul
@@ -765,9 +768,9 @@ echo.
 echo.
 %cecho% *          Repacking to: {0a}!format!{#} format...
 echo.
-bins\new_cyg\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
+bins\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
 TIMEOUT /T 3 /nobreak >nul
-if exist 01-Project\2-New_system\vendor_ext4.img bins\new_cyg\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
+if exist 01-Project\2-New_system\vendor_ext4.img bins\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
 TIMEOUT /T 3 /nobreak >nul
 bins\simg2sdat 01-Project\2-New_system\system.img 01-Project\2-New_system >nul
 TIMEOUT /T 3 /nobreak >nul
