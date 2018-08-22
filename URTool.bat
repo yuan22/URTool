@@ -1,7 +1,7 @@
 @shift /0
 @echo OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
-SET APP_NAME=UR-Tool Prime v1.4 beta
+SET APP_NAME=UR-Tool Prime v1.5 beta
 SET AUTHORS=[by JamFlux]
 SET APP_DESCRIPTION=Extract and Repack system formats on android 5-8.1
 set CYGWIN=nodosfilewarning
@@ -413,6 +413,42 @@ echo.
 %cecho% *          Extracting {0a}system.img{#}...
 echo.
 echo.
+::Creating symlinks extraction...
+if not exist 01-Project\system mkdir 01-Project\system
+bins\7z x -y "01-Project\1-Sources\system.img" -o"01-Project\system" >nul 2>nul
+rmdir /q /s 01-Project\system\[SYS] >nul
+cls
+echo.
+echo.
+echo 	   ".##..##.#####.........######..####...####..##.....";
+echo 	   ".##..##.##..##..........##...##..##.##..##.##.....";
+echo 	   ".##..##.#####..######...##...##..##.##..##.##.....";
+echo 	   ".##..##.##..##..........##...##..##.##..##.##.....";
+echo 	   "..####..##..##..........##....####...####..######.";
+echo 	   "..................................................";
+echo.
+%cecho%                                                       {03}by JamFlux{#}
+echo.
+echo.
+echo            *****************************************************
+%cecho% *          Working with {0b}!format!{#} ROM:
+echo.
+%cecho% *          {0b}!file!{#}
+echo.
+echo            *****************************************************
+echo.
+echo.
+echo.
+%cecho% *          Grabbing {0a}symlinks{#} and {0a}permissions{#}...
+echo.
+echo.
+call :write_symlinks
+call :write_permissions
+if exist 01-Project\1-Sources\not_recursive del 01-Project\1-Sources\not_recursive >nul
+if exist 01-Project\1-Sources\permissions_sorted del 01-Project\1-Sources\permissions_sorted >nul
+if exist 01-Project\1-Sources\recursive del 01-Project\1-Sources\recursive >nul
+if exist 01-Project\1-Sources\rom_permissions del 01-Project\1-Sources\rom_permissions >nul
+if exist 01-Project\1-Sources\system_contexts del 01-Project\1-Sources\system_contexts >nul
 if exist 01-Project\1-Sources\system.img bins\ImgExtractor 01-Project\1-Sources\system.img 01-Project\system >nul
 call :Detect_vendor_size
 echo %SIZE%>>01-Project\1-Sources\sys_size.txt
@@ -421,10 +457,6 @@ if exist 01-Project\vendor echo %VSIZE%>>01-Project\1-Sources\vend_size.txt
 if exist 01-Project\1-Sources\vendor.img del 01-Project\1-Sources\vendor.img >nul
 if exist 01-Project\1-Sources\vendor.transfer.list del 01-Project\1-Sources\vendor.transfer.list >nul
 echo.
-::bins\7z x -y "01-Project\1-Sources\system.img" -o"01-Project\system" >nul 2>nul
-::rmdir /q /s 01-Project\system\[SYS] >nul
-::call :write_symlinks
-::bins\dos2unix 01-Project/1-Sources/original_symlinks >nul
 cls
 echo.
 echo.
@@ -454,6 +486,10 @@ if exist 01-Project\1-Sources\system.img del 01-Project\1-Sources\system.img >nu
 if exist 01-Project\1-Sources\system.transfer.list del 01-Project\1-Sources\system.transfer.list >nul 2>nul
 if not exist 01-Project\1-Sources\file_contexts call :File_Context_converter >nul 2>nul
 TIMEOUT /T 3 /nobreak > NUL
+cd 01-Project/1-Sources > nul
+del original_symlinks > nul
+move /y symlinks original_symlinks > nul
+cd ..\..
 goto work_place
 
 
@@ -555,8 +591,8 @@ echo.
 %cecho% *          Repacking to: {0a}!format!{#} format...
 echo.
 if not exist 01-Project\2-New_system mkdir 01-Project\2-New_system >nul
-if exist 01-Project\vendor bins\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
-bins\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
+if exist 01-Project\vendor bins\new_cyg\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
+bins\new_cyg\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
 if "!format!"=="payload.bin" (goto Repack_IMG) else goto next_1.1
 :next_1.1
 cls
@@ -604,7 +640,8 @@ echo.
 %cecho% *          Repacking to: {0a}system.img{#} format...
 echo.
 if not exist 01-Project\2-New_system mkdir 01-Project\2-New_system >nul
-bins\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
+if exist 01-Project\vendor bins\new_cyg\make_ext4fs -L vendor -T 0 -S 01-Project\1-Sources\file_contexts -l %VSIZE% -a vendor 01-Project\2-New_system\vendor_ext4.img 01-Project\vendor\ >nul 2>nul
+bins\new_cyg\make_ext4fs -L system -T 0 -S 01-Project\1-Sources\file_contexts -l %SIZE% -a system 01-Project\2-New_system\system_ext4.img 01-Project\system\ >nul 2>nul
 cls
 echo.
 echo.
@@ -659,9 +696,9 @@ echo.
 echo.
 %cecho% *          Compressing to: {0a}!format!{#} format...
 echo.
-bins\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
+bins\new_cyg\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
 TIMEOUT /T 3 /nobreak >nul
-if exist 01-Project\2-New_system\vendor_ext4.img bins\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
+if exist 01-Project\2-New_system\vendor_ext4.img bins\new_cyg\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
 TIMEOUT /T 3 /nobreak >nul
 bins\simg2sdat 01-Project\2-New_system\system.img 01-Project\2-New_system >nul
 TIMEOUT /T 3 /nobreak >nul
@@ -728,9 +765,9 @@ echo.
 echo.
 %cecho% *          Repacking to: {0a}!format!{#} format...
 echo.
-bins\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
+bins\new_cyg\ext2simg -v 01-Project\2-New_system\system_ext4.img 01-Project\2-New_system\system.img >nul
 TIMEOUT /T 3 /nobreak >nul
-if exist 01-Project\2-New_system\vendor_ext4.img bins\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
+if exist 01-Project\2-New_system\vendor_ext4.img bins\new_cyg\ext2simg -v 01-Project\2-New_system\vendor_ext4.img 01-Project\2-New_system\vendor.img >nul
 TIMEOUT /T 3 /nobreak >nul
 bins\simg2sdat 01-Project\2-New_system\system.img 01-Project\2-New_system >nul
 TIMEOUT /T 3 /nobreak >nul
@@ -820,6 +857,7 @@ move /y 01-Project\2-New_system\vendor.transfer.list 1-Finish >nul 2>nul
 move /y 01-Project\1-Sources\boot.img 1-Finish >nul 2>nul
 move /y 01-Project\1-Sources\file_contexts 1-Finish >nul 2>nul
 move /y 01-Project\1-Sources\original_symlinks 1-Finish >nul 2>nul
+move /y 01-Project\1-Sources\original_permissions 1-Finish >nul 2>nul
 if exist 01-Project rmdir /q /s 01-Project >nul 2>nul
 goto:eof
 
@@ -851,6 +889,37 @@ TIMEOUT /T 5 /nobreak > NUL
 :third
 if exist "01-Project\1-Sources\symlinks" !busybox! sort -u < "01-Project/1-Sources/symlinks" >> "01-Project/1-Sources/original_symlinks"
 goto:eof
+
+
+:write_permissions
+	!busybox! sed 's/--//g' 01-Project\1-Sources\file_contexts | !busybox! grep "^/system/" | !busybox! sort > 01-Project\1-Sources\system_contexts
+	!busybox! sed 's/\\\././g; s/\\\+/+/g; s/(\/\.\*)?//g; s/\.\*//g; s/(\.\*)//g' 01-Project\1-Sources\system_contexts | bins\gawk "{ print $1, $NF }" | !busybox! sort > 01-Project\1-Sources\system_contexts2
+	!busybox! mv 01-Project\1-Sources\system_contexts2 01-Project\1-Sources\system_contexts
+	if exist "01-Project/1-Sources/file_contexts" for /f "delims=" %%f in ('!busybox! cat "bins\metadata.txt" ^| !busybox! cut -d"""" -f2') do (
+		set replace=no
+		for /f "delims=" %%a in ('!busybox! grep -m 1 "%%f " 01-Project\1-Sources\system_contexts ^| bins\gawk "{ print $NF }"') do set replace=%%a
+		if "!replace!"=="no" set replace=u:object_r:system_file:s0
+		if exist "01-Project%%f" !busybox! grep -w '"%%f"' bins/metadata.txt | !busybox! sed "s/REPLACE_HERE/!replace!/">>01-Project\1-Sources\rom_permissions
+	)
+	for /f "delims=" %%a in ('type 01-Project\1-Sources\system_contexts') do (
+		for /f "delims=" %%b in ('echo %%a ^| bins\gawk "{print $1}"') do set file2=%%b
+		for /f "delims=" %%b in ('echo %%a ^| bins\gawk "{print $NF}"') do set contexts=%%b
+		for /f "delims=" %%v in ('!busybox! grep -cw '"!file2!"' 01-Project/1-Sources/rom_permissions') do set check=%%v
+		for /f "delims=" %%z in ('echo !file2!') do if "!check!"=="0" if not exist "01-Project\system\bins\%%~nz" if exist "01-Project!file2!" echo set_metadata("!file2!", "capabilities", 0x0, "selabel", "!contexts!";;; | !busybox! sed "s/;;;/);/">>01-Project\1-Sources\rom_permissions
+		for /f "delims=" %%z in ('echo !file2!') do if exist "01-Project\system\bins\%%~nz" echo set_metadata("!file2!", "uid", 0, "gid", 2000, "mode", 0755, "capabilities", 0x0, "selabel", "!contexts!";;; | !busybox! sed "s/;;;/);/">>01-Project\1-Sources\rom_permissions
+	)
+	if exist "01-Project/1-Sources/file_contexts" (
+		bins\dos2unix -q 01-Project\1-Sources\rom_permissions
+		!busybox! sed -i -e "s/); /);/g" 01-Project/1-Sources/rom_permissions
+		!busybox! sort -u < 01-Project/1-Sources/rom_permissions >> 01-Project/1-Sources/permissions_sorted
+		!busybox! grep "set_metadata_recursive" 01-Project/1-Sources/permissions_sorted >> 01-Project/1-Sources/recursive
+		!busybox! grep -v "set_metadata_recursive" 01-Project/1-Sources/permissions_sorted >> 01-Project/1-Sources/not_recursive
+		!busybox! cat 01-Project/1-Sources/not_recursive >> 01-Project/1-Sources/recursive
+		type 01-Project\1-Sources\recursive >> 01-Project\1-Sources\original_permissions
+	)
+	goto:eof
+	
+	
 
 :Detect_vendor_size
 FOR %%B IN ("01-Project\1-Sources"\vendor.img) DO SET VSIZE=%%~zB
