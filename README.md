@@ -14,5 +14,5 @@ Repack vendor.img/.dat.br, system.img/.dat.br,  exception for payload.bin but th
 # Tested
 --> Redmi Note 3 Pro (kenzo), tested on stock Miui 10 with android 6.0.1, it booted up satisfactorily.
     tested using official Lineage OS 14.1 under android 7.1 and it booted up satisfactorily.
-    tested using Pixel experience ROM under android 8.1 and it didn't boot, help is needed.
+    android 8.1 roms are booting up too ;)
 
