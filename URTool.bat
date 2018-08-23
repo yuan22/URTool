@@ -415,8 +415,9 @@ echo.
 echo.
 ::Creating symlinks extraction...
 if not exist 01-Project\system mkdir 01-Project\system
-bins\7z x -y "01-Project\1-Sources\system.img" -o"01-Project\system" >nul 2>nul
-rmdir /q /s 01-Project\system\[SYS] >nul
+::bins\7z x -y "01-Project\1-Sources\system.img" -o"01-Project\system" >nul 2>nul
+::rmdir /q /s 01-Project\system\[SYS] >nul
+if exist 01-Project\1-Sources\system.img bins\ImgExtractor 01-Project\1-Sources\system.img 01-Project\system >nul
 cls
 echo.
 echo.
@@ -442,14 +443,13 @@ echo.
 %cecho% *          Grabbing {0a}symlinks{#} and {0a}permissions{#}...
 echo.
 echo.
-call :write_symlinks
-call :write_permissions
+call :write_sys_symlinks
+call :write_sys_permissions
 if exist 01-Project\1-Sources\not_recursive del 01-Project\1-Sources\not_recursive >nul
 if exist 01-Project\1-Sources\permissions_sorted del 01-Project\1-Sources\permissions_sorted >nul
 if exist 01-Project\1-Sources\recursive del 01-Project\1-Sources\recursive >nul
 if exist 01-Project\1-Sources\rom_permissions del 01-Project\1-Sources\rom_permissions >nul
 if exist 01-Project\1-Sources\system_contexts del 01-Project\1-Sources\system_contexts >nul
-if exist 01-Project\1-Sources\system.img bins\ImgExtractor 01-Project\1-Sources\system.img 01-Project\system >nul
 call :Detect_vendor_size
 echo %SIZE%>>01-Project\1-Sources\sys_size.txt
 echo.
@@ -866,7 +866,7 @@ goto:eof
 
 
 
-:write_symlinks
+:write_sys_symlinks
 	if not exist "01-Project\1-Sources\symlinks" for /f "delims=" %%a in ('bins\find 01-Project/system -type l ^| !busybox! sed "s/01-Project//"') do (
 		for /f "delims=" %%b in ('!busybox! readlink 01-Project%%a') do echo symlink("%%b", "%%a";;;| !busybox! sed "s/;;;/);/">>01-Project\1-Sources\symlinks
 	)
@@ -894,7 +894,7 @@ if exist "01-Project\1-Sources\symlinks" !busybox! sort -u < "01-Project/1-Sourc
 goto:eof
 
 
-:write_permissions
+:write_sys_permissions
 	!busybox! sed 's/--//g' 01-Project\1-Sources\file_contexts | !busybox! grep "^/system/" | !busybox! sort > 01-Project\1-Sources\system_contexts
 	!busybox! sed 's/\\\././g; s/\\\+/+/g; s/(\/\.\*)?//g; s/\.\*//g; s/(\.\*)//g' 01-Project\1-Sources\system_contexts | bins\gawk "{ print $1, $NF }" | !busybox! sort > 01-Project\1-Sources\system_contexts2
 	!busybox! mv 01-Project\1-Sources\system_contexts2 01-Project\1-Sources\system_contexts
