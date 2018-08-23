@@ -28,7 +28,7 @@ See credits.txt for binary authors
 --> Redmi Note 3 Pro (kenzo), tested on stock Miui 10 with android 6.0.1, it booted up satisfactorily.
     tested using official Lineage OS 14.1 under android 7.1 and it booted up satisfactorily.
     tested using android 8.1 and it works too.
-Not tested on android 9 roms yet.
+*Not tested on android 9 roms yet*
 ```
 
 
